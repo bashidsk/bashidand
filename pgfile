@@ -1,0 +1,494 @@
+package autofeed.eruvaka;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import org.achartengine.ChartFactory;
+import org.achartengine.GraphicalView;
+import org.achartengine.chart.BarChart;
+import org.achartengine.chart.BarChart.Type;
+import org.achartengine.model.CategorySeries;
+import org.achartengine.model.MultipleCategorySeries;
+import org.achartengine.model.XYMultipleSeriesDataset;
+import org.achartengine.model.XYSeries;
+import org.achartengine.renderer.DefaultRenderer;
+import org.achartengine.renderer.SimpleSeriesRenderer;
+import org.achartengine.renderer.XYMultipleSeriesRenderer;
+import org.achartengine.renderer.XYSeriesRenderer;
+
+import android.app.Activity;
+import android.app.Fragment;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Align;
+import android.net.ParseException;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class FeedDetails extends Fragment {
+	
+	public static final String ITEM_NAME = "itemName";
+	public static final String REFID = "REFID";
+	static Activity FeedDetails;
+	View tab1 = null;
+	private View mChart;
+ 
+	 SQLiteHelper helper;
+	 SQLiteDatabase database;;
+	 SQLiteStatement statement;
+	 float values[]={300,400,100,500};
+	 List<Float> slices = new ArrayList<Float>();
+	 List<Float> slices2 = new ArrayList<Float>();
+	 ArrayList<HashMap<String, String>> mylist = new ArrayList<HashMap<String, String>>();
+	 		 
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		 try{
+			   String feedersno=getArguments().getString(ITEM_NAME).toString().trim();
+		       String refid=getArguments().getString(REFID).toString().trim();
+		       FeedDetails=getActivity();
+		       tab1= inflater.inflate(R.layout.feeddetails, container,false);
+		       TextView tv=(TextView)tab1.findViewById(R.id.feediddisplay);
+		       TextView datetv=(TextView)tab1.findViewById(R.id.feediddate1);
+		       tv.setText(refid);
+		     		  
+		       try{
+			          helper=new SQLiteHelper(getActivity());
+			          database=helper.getReadableDatabase();
+					   String query = ("select * from Autofeed  where  id ='" + feedersno + "'");
+			            Cursor crs=database.rawQuery(query, null);
+			                if(crs!=null){
+			    	      if(crs.moveToLast()){
+			    		       
+			    			  String feederid=crs.getString(crs.getColumnIndex("feedid"));
+			    			  ApplicationData.setfeedid(feederid);
+			    			  String feeddate=crs.getString(crs.getColumnIndex("date"));
+			    			  try {
+									SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd",Locale.getDefault());
+									 Date dt;
+										dt = form.parse(feeddate);
+										long mill = dt.getTime();
+										ApplicationData.addmill(mill);
+									} catch (java.text.ParseException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								   	 
+								    SimpleDateFormat formatter = new SimpleDateFormat("dd MMM",Locale.getDefault());
+							        long milk=  ApplicationData.getmill();
+							        Date date = new Date(milk);
+							        String datetime = formatter.format(date).toString().trim();
+							 
+							        long today = System.currentTimeMillis();
+							        SimpleDateFormat presentdate = new SimpleDateFormat("dd MMM ",Locale.getDefault());
+							        String present = presentdate.format(today).toString().trim();
+							        if(present .equals( datetime )) {
+							        	String todaydispaly = ("Today").toString().trim();
+							        	datetv.setText(todaydispaly);
+							        	 	        	
+							        } else {
+							        	 
+							        	datetv.setText(datetime);
+							        } 
+			    	       }
+			          }
+			     }catch(Exception e){
+			    	 e.printStackTrace();
+			     }
+		       tv.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					try{
+             		   String feederid=ApplicationData.getfeederid().toString().trim();
+     					 helper = new SQLiteHelper(getActivity());
+     				        database = helper.getReadableDatabase();
+     				   	String query = ("select * from Autofeed  where  feedid ='" + feederid + "'");
+    				        Cursor	cursor = database.rawQuery(query, null);
+     						if(cursor != null){
+     							if(cursor.moveToLast()){
+     								
+     								String deviceid = cursor.getString(cursor.getColumnIndex("feedid"));
+     								ApplicationData.adddeviceid(deviceid);
+     								String aliasname=cursor.getString(cursor.getColumnIndex("aliasName"));
+ 									ApplicationData.addaliasname(aliasname);
+     								String noschedules = cursor.getString(cursor.getColumnIndex("noschedules"));
+     								int y=Integer.parseInt(noschedules);
+     								ApplicationData.addschedules(y);
+     								String feedgap=cursor.getString(cursor.getColumnIndex("feedgap"));
+     								ApplicationData.addfeedgap(feedgap);
+     								String feeddispense=cursor.getString(cursor.getColumnIndex("feeddispense"));
+     								ApplicationData.addfeeddispense(feeddispense);
+     								String dated=cursor.getString(cursor.getColumnIndex("date")); 
+     								  ApplicationData.adddate(dated);
+     								  SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd",Locale.getDefault());
+										try {
+											java.util.Date dt =  form.parse(dated);
+											long mill = dt.getTime();
+											ApplicationData.addmill(mill);
+										} catch (ParseException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}		
+										 try{		 
+     							    String feedsno=cursor.getString(cursor.getColumnIndex("id")); 
+     							    ApplicationData.addfeedsno(feedsno);
+     							    
+     							    String aqua_feedid=cursor.getString(cursor.getColumnIndex("aqua_feedid")); 
+     							     String zerostr="0".toString().trim();
+     							     
+     							     if(aqua_feedid.equals(zerostr)){
+     							    	//Toast.makeText(getActivity(), "zero", Toast.LENGTH_SHORT).show(); 
+     							    	 ApplicationData.setaqua_feedname(aqua_feedid);
+     							    	 ApplicationData.setaquafeedname1(aqua_feedid);
+     							     }else{
+     							    	 try{
+     							    	 helper = new SQLiteHelper(getActivity());
+			        				        database = helper.getReadableDatabase();
+			        				   	String query1 = ("select * from AquaFeed  where  Aquafeedid ='" + aqua_feedid + "'");
+			       				        Cursor	cursor1 = database.rawQuery(query1, null);
+			        						if(cursor1 != null){
+			        							if(cursor1.moveToLast()){
+			        								String aquafeedname= cursor1.getString(cursor1.getColumnIndex("Aquafeedname"));
+			        								String aquafeedid= cursor1.getString(cursor1.getColumnIndex("Aquafeedid"));
+			        								 ApplicationData.setaquafeedname1(aquafeedname);
+				        							    ApplicationData.setaqua_feedname(aquafeedid);
+			        								//Toast.makeText(getApplicationContext(), feedid, Toast.LENGTH_SHORT).show();
+			        							}
+			        							} 
+     							    	 }catch(Exception e){
+     							    		 e.printStackTrace();
+     							    	 }
+     							     }
+     							     System.out.println(aqua_feedid);
+     							     
+    				      				
+    				      			}catch(Exception e){
+    				      				e.printStackTrace();
+    				      			}
+     								    	
+     								}
+     						}
+     				}catch(Exception e){
+     					e.printStackTrace();
+     				}
+					List<Integer> mcolors =  ApplicationData.getListColor();
+					for(int k=0;k<mcolors.size();k++){
+					System.out.println(mcolors.get(k));
+						 
+					}
+    				 //isInternetAvailableGetdata();
+    				 Intent histintent=new Intent(getActivity(),TabsActivity.class);
+    				  histintent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    				   startActivity(histintent); 
+				}
+			});
+		        
+		       try{
+					 	
+						 helper = new SQLiteHelper(getActivity());
+					     database = helper.getReadableDatabase();
+					   	String query = ("select * from SchedulesData  where  num ='" + feedersno + "'");
+					    Cursor	cursor = database.rawQuery(query, null);
+				    //int g=cursor.getCount();
+				    //String str=Integer.toString(g);
+				    //Toast.makeText(getActivity(), str, Toast.LENGTH_SHORT).show();
+				    HashMap<String, String> map ;
+							if(cursor != null){
+								mylist.clear();
+								if(cursor.moveToFirst()){
+									do{
+									map = new HashMap<String, String>();
+									String sno = cursor.getString(cursor.getColumnIndex("num"));
+									map.put("feedsno",sno); 
+									String feedkg=cursor.getString(cursor.getColumnIndex("FEEDKG"));
+									map.put("feedkg",feedkg); 
+									Float fekg= Float.parseFloat(feedkg);
+									slices.add(fekg);
+									String fromtime=cursor.getString(cursor.getColumnIndex("FMTIME"));
+									map.put("fromtime",fromtime); 
+									String totime=cursor.getString(cursor.getColumnIndex("TOOTIME"));
+									map.put("totime",totime); 
+									mylist.add(map);  
+									System.out.println(mylist);
+									}while(cursor.moveToNext());
+									}
+							}
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+		       try{
+		       Chart();
+		       update();
+		       }catch(Exception e){
+		    	   e.printStackTrace();
+		       }
+		           
+		      
+		  }catch(Exception e){
+			  e.printStackTrace();
+		  }
+		
+		return tab1;
+		 
+	}
+	private void update() {
+		// TODO Auto-generated method stub
+		final TableLayout t1=(TableLayout)tab1.findViewById(R.id.tblfeeddetails);
+		 t1.setVerticalScrollBarEnabled(true);
+	   	 t1.removeAllViewsInLayout(); 
+		 for(int i=0; i<mylist.size(); i++) {
+	   		 HashMap<String, String> map = mylist.get(i);
+	   		 String totalfeedkg = map.get("feedkg").toString().trim();
+	   		float flfeed=Float.parseFloat(totalfeedkg);
+			float abs3 = Math.abs(flfeed);
+			String feedkg=Float.toString(abs3);
+	   		 String fromtime1=map.get("fromtime").toString().trim();
+	   		/* String[] separated1 = fromtime1.split("\\:");
+	   		 String str1=separated1[0];
+	   		 String str2=separated1[1];
+	   		  if(str1.length()==2){
+	   			 System.out.println(str1+":"+str2);
+	   		  }else{
+	   			System.out.println("0"+str1+":"+str2);
+	   		  }*/
+	   		   		
+	   		 //System.out.println(str2);
+	   		 String totime1=map.get("totime").toString().trim();
+	   		/* String[] separated2 = totime1.split("\\:");
+	   		 String str11=separated2[0];
+	   		 String str22=separated2[1];
+	   		  if(str11.length()==2){
+	   			 System.out.println(str11+":"+str22);
+	   		  }else{
+	   			System.out.println("0"+str11+":"+str22);
+	   		  }*/
+	   		    View v=new View(getActivity());
+	       		v.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
+	            v.setBackgroundResource(R.drawable.seperator);
+	                	   
+	   		 final TableRow tablerow= new TableRow(getActivity());
+	   		   
+	       	   TableLayout.LayoutParams lp = 
+	       			new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT,TableLayout.LayoutParams.WRAP_CONTENT);
+	         	    int leftMargin=0;int topMargin=3;int rightMargin=0;int bottomMargin=3;
+	       			lp.setMargins(leftMargin, topMargin, rightMargin, bottomMargin);             
+	       			tablerow.setLayoutParams(lp);
+	       			
+	       			final TextView fromtime=new TextView(getActivity());
+	       			fromtime.setText(fromtime1+" to "+totime1);
+	       			fromtime.setTextColor(Color.BLACK);
+	       			fromtime.setKeyListener(null);
+	       			fromtime.setTextSize(15);
+	       			
+	       			fromtime.setGravity(Gravity.CENTER);
+	       			fromtime.setFreezesText(true);
+					
+					final TextView totime=new TextView(getActivity());
+					totime.setText(totime1);
+					totime.setTextColor(Color.BLACK);
+					totime.setKeyListener(null);
+					totime.setTextSize(15);
+					totime.setGravity(Gravity.CENTER);
+					totime.setFreezesText(true);
+					
+					List<Integer> mcolors =  ApplicationData.getListColor();
+					
+				  final TextView bullet=new TextView(getActivity());
+				       bullet.setKeyListener(null);
+				       bullet.setGravity(Gravity.CENTER);
+				       bullet.setFreezesText(true);
+				       bullet.setBackgroundColor(mcolors.get(i));
+				       
+				     // bullet.setBackgroundResource(R.drawable.dot);
+					final TextView tv=new TextView(getActivity());
+					tv.setVisibility(View.INVISIBLE);
+					tv.setGravity(Gravity.LEFT);
+					//tv.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT, 0));
+					
+					final TextView feedkgs=new TextView(getActivity());
+					feedkgs.setText(feedkg);
+					feedkgs.setTextColor(Color.BLACK);
+					feedkgs.setKeyListener(null);
+					feedkgs.setTextSize(15);
+					feedkgs.setGravity(Gravity.LEFT);
+					feedkgs.setFreezesText(true);
+				 
+					//feederid.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT, 0));
+					 View vv=new View(getActivity()); 
+					 vv.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
+			         vv.setBackgroundResource(R.drawable.seperator);
+			        
+      		        tablerow.addView(fromtime);
+					//tablerow.addView(totime);
+      		        //tablerow.addView(vv);
+      		        tablerow.addView(bullet);
+      		        tablerow.addView(tv);
+				 	tablerow.addView(feedkgs);
+				 	t1.addView(v);   	        
+    	  	        t1.addView(tablerow);
+    	  	      tablerow.setOnClickListener(new View.OnClickListener() {
+
+                      @Override
+                      public void onClick(View pView) {
+                    	  try{
+                    		   String feederid=ApplicationData.getfeederid().toString().trim();
+            					 helper = new SQLiteHelper(getActivity());
+            				        database = helper.getReadableDatabase();
+            				   	String query = ("select * from Autofeed  where  feedid ='" + feederid + "'");
+           				        Cursor	cursor = database.rawQuery(query, null);
+            						if(cursor != null){
+            							if(cursor.moveToLast()){
+            								
+            								String deviceid = cursor.getString(cursor.getColumnIndex("feedid"));
+            								ApplicationData.adddeviceid(deviceid);
+            								String aliasname=cursor.getString(cursor.getColumnIndex("aliasName"));
+        									ApplicationData.addaliasname(aliasname);
+            								String noschedules = cursor.getString(cursor.getColumnIndex("noschedules"));
+            								int y=Integer.parseInt(noschedules);
+            								ApplicationData.addschedules(y);
+            								String feedgap=cursor.getString(cursor.getColumnIndex("feedgap"));
+            								ApplicationData.addfeedgap(feedgap);
+            								String feeddispense=cursor.getString(cursor.getColumnIndex("feeddispense"));
+            								ApplicationData.addfeeddispense(feeddispense);
+            								String dated=cursor.getString(cursor.getColumnIndex("date")); 
+            								  ApplicationData.adddate(dated);
+            								  SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd",Locale.getDefault());
+      										try {
+      											java.util.Date dt =  form.parse(dated);
+      											long mill = dt.getTime();
+      											ApplicationData.addmill(mill);
+      										} catch (ParseException e) {
+      											// TODO Auto-generated catch block
+      											e.printStackTrace();
+      										}		
+      											 
+            							    String feedsno=cursor.getString(cursor.getColumnIndex("id")); 
+            							    ApplicationData.addfeedsno(feedsno);
+            							    String aqua_feedid=cursor.getString(cursor.getColumnIndex("aqua_feedid")); 
+            							     
+            							    try{
+           				      				 helper = new SQLiteHelper(getActivity());
+   				        				        database = helper.getReadableDatabase();
+   				        				   	String query1 = ("select * from AquaFeed  where  Aquafeedid ='" + aqua_feedid + "'");
+   				       				        Cursor	cursor1 = database.rawQuery(query1, null);
+   				        						if(cursor1 != null){
+   				        							if(cursor1.moveToLast()){
+   				        								String aquafeedname= cursor1.getString(cursor1.getColumnIndex("Aquafeedname"));
+   				        								String aquafeedid= cursor1.getString(cursor1.getColumnIndex("Aquafeedid"));
+   				        							    ApplicationData.setaquafeedname1(aquafeedname);
+   				        							    ApplicationData.setaqua_feedname(aquafeedid);
+   				        								//Toast.makeText(getApplicationContext(), feedid, Toast.LENGTH_SHORT).show();
+   				        							}
+   				        							}
+           				      			}catch(Exception e){
+           				      				e.printStackTrace();
+           				      			}
+            								    	
+            								}
+            						}
+            				}catch(Exception e){
+            					e.printStackTrace();
+            				}
+                    	  
+                    		List<Integer> mcolors =  ApplicationData.getListColor();
+        					for(int k=0;k<mcolors.size();k++){
+        					System.out.println(mcolors.get(k));
+        						 
+        					}
+            				 //isInternetAvailableGetdata();
+            				 Intent histintent=new Intent(getActivity(),TabsActivity.class);
+            				  histintent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            				   startActivity(histintent);  
+
+                      }});
+    	  	        
+		 }
+	}
+	 
+	private void Chart(){ 
+		final CategorySeries series = new CategorySeries("pie");
+		// X-series
+		 for (int i = 0; i < slices.size(); i++) {
+	            series.add(slices.get(i) + "",
+	             (slices.get(i)));
+	        }
+		 
+	 
+		 List<Integer> colors = new ArrayList<Integer>();
+		    int[] colorr = { Color.parseColor("#ff9c40"), 
+		    		Color.parseColor("#34d3c4"), Color.parseColor("#ff8381"),
+		            Color.parseColor("#46da2a"),  Color.parseColor("#5aa4e2"), 
+		            Color.parseColor("#b434d3") };
+		    // Y-series
+		    for (int i = 0; i < slices.size(); i++) {
+		       colors.add(colorr[i]);
+                 ApplicationData.addListColor(colors);
+		    }
+		    
+		    DefaultRenderer   renderer = new DefaultRenderer();
+		    for (int color = 0; color < colors.size(); color++) {
+		        SimpleSeriesRenderer r = new SimpleSeriesRenderer();
+		        r.setColor(colors.get(color));
+		        //r.setDisplayBoundingPoints(false);
+		        //r.setDisplayChartValues(20);
+		        r.setDisplayChartValues(false);
+		        r.setChartValuesTextSize(18);
+		        
+		        // r.setStroke(BasicStroke.SOLID);
+		     
+		        renderer.addSeriesRenderer(r);
+		    }
+		   
+		    renderer.setZoomEnabled(false);
+		    renderer.setPanEnabled(false);
+		    renderer.setZoomButtonsVisible(false); // set zoom button in Graph
+		    renderer.setApplyBackgroundColor(false);
+		  
+		    renderer.setBackgroundColor(Color.WHITE); // set background color
+		    //renderer.setChartTitle("Pie Chart");
+		    //renderer.setLabelsColor(Color.BLACK);
+		    renderer.setMargins(new int[] { 20, 100, 20, 15 });
+		    //renderer.setLabelsTextSize(20);
+		    //renderer.setChartTitleTextSize((float) 30);
+		    renderer.setShowLabels(false);
+		    renderer.setLegendTextSize(25);
+		    
+		    //renderer.setLabelsAlign(Align.LEFT, 0);
+		    //renderer.setDisplayValues(true);
+		    renderer.setStartAngle(130);
+		    //diasble display values in below piechart
+		    renderer.setShowLegend(false);
+		    //renderer.setLegendHeight(10);
+		    renderer.setInScroll(true);
+		    LinearLayout chartContainer = (LinearLayout)tab1.findViewById(R.id.charts);
+			  //remove any views before u paint the chart
+			chartContainer.removeAllViews();
+			 
+			//MultipleCategorySeries SeriesDataset =new MultipleCategorySeries("pie");
+					         
+		    GraphicalView mChart = ChartFactory.getPieChartView(getActivity(), series,renderer);
+		    //GraphicalView mChart = ChartFactory.getDoughnutChartView(getActivity(), SeriesDataset, renderer);
+		    chartContainer.addView(mChart);
+	}
+	 
+}
