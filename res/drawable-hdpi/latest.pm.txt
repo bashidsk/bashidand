@@ -1,0 +1,663 @@
+package com.eruvaka.pm;
+
+import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.json.JSONObject;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.json.JSONArray;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
+
+public class MainActivity extends ActionBarActivity {
+	private static final int TIMEOUT_MILLISEC = 0;
+	ArrayList<HashMap<String, String>> mylist = new ArrayList<HashMap<String, String>>();
+	SharedPreferences ApplicationDetails;
+	SharedPreferences.Editor ApplicationDetailsEdit;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		 getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.signinupshape));
+		  if(isInternetAvailable()){
+				 new GetFeederDeatils().execute();
+			  			
+		  }
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.activty_main, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.menu_refresh) {
+			 if(isInternetAvailable()){
+				 new GetFeederDeatils().execute();
+			  				
+		  }
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	protected boolean isInternetAvailable() {
+		// TODO Auto-generated method stub
+		ConnectivityManager cm =(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo netInfo = cm.getActiveNetworkInfo();
+	     if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+			
+	  	  return true;		        
+		}else{ 
+			Toast.makeText(MainActivity.this, "NO INTERNET ", Toast.LENGTH_SHORT).show();					
+		}
+		return false;
+		}
+	 public class GetFeederDeatils extends AsyncTask<String, Void, Void> {
+	        ProgressDialog progressdialog= new ProgressDialog(MainActivity.this);
+
+	        /* (non-Javadoc)
+	         * @see android.os.AsyncTask#onPreExecute()
+	         */
+	        @Override
+	        protected void onPreExecute() {
+	            // TODO Auto-generated method stub
+	            progressdialog.setMessage("Loading. please wait...");
+	            progressdialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+	            progressdialog.setIndeterminate(true);
+	            progressdialog.setCancelable(true);
+	           // progressdialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.progressbar));
+	            progressdialog.show();
+	            progressdialog.setCanceledOnTouchOutside(false);
+	            super.onPreExecute();
+	        }
+	        /* (non-Javadoc)
+	         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+	         */
+	        @Override
+	        protected void onPostExecute(Void result) {
+	            // TODO Auto-generated method stub
+	                progressdialog.dismiss();
+	                super.onPostExecute(result);
+	                AlertDialog.Builder build = new AlertDialog.Builder(MainActivity.this);
+	    	    	build.setTitle(getResources().getString(R.string.action_settings));
+	    	    	String json_response=ApplicationData.getregentity().toString().trim();
+	    		     String no_response="nodata".toString().trim();
+	    		     if(no_response.equals(json_response)){
+	 		    	    build.setMessage("NO DATA Found");
+	 	           		build.setPositiveButton("OK",new DialogInterface.OnClickListener() {
+	 	                @Override
+	 					public void onClick(DialogInterface dialog, int id) {
+	 	               	 dialog.cancel();
+	 	                }
+	 	                });
+	 	        		build.show();
+	 		     }else{
+	 		    	 try{
+	 		    		JSONObject jsn = new JSONObject(json_response);
+						String response = jsn.getString("status");
+						String zero = "0".toString().trim();
+						if (response.equals(zero)) {
+							String error = jsn.getString("error");
+							AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+							alertDialog.setMessage(error);
+							alertDialog.setNegativeButton("OK",
+									new DialogInterface.OnClickListener() {
+										public void onClick(
+												DialogInterface dialog,
+												int which) {
+
+											dialog.cancel();
+										}
+									});
+							alertDialog.show();
+						}else{
+							try{
+			 		    		 
+			 		    		String data=jsn.getString("data");
+		           				JSONObject jObject2 = new JSONObject(data);
+		           				//Get Feeder Details
+		           				JSONArray feeder_details = jObject2.getJSONArray("device_data");
+		           				mylist.clear();
+		           				for (int i = 0; i < feeder_details.length(); i++) {
+			           			     try{
+			           				HashMap<String, String> map = new HashMap<String, String>();
+			           				JSONObject jObject = feeder_details.getJSONObject(i);
+			           				map.put("feederId", jObject.getString("feederId"));
+			           				map.put("feederSno", jObject.getString("feederSno"));
+			           				map.put("feederName", jObject.getString("feederName"));
+			           				map.put("schedule_date", jObject.getString("schedule_date"));
+			           				map.put("last_update_time", jObject.getString("last_update_time"));  
+			           				map.put("total_dispensed_feed", jObject.getString("total_dispensed_feed"));
+			           				JSONArray schedules = jObject.getJSONArray("schedules");
+			           				map.put("schedules", schedules.toString());
+			           				/*map.put("feed_gap", jObject.getString("feed_gap"));
+			           				map.put("Onekg_feed_disp_time", jObject.getString("Onekg_feed_disp_time"));
+			           			 	map.put("total_feed", jObject.getString("total_feed"));
+			           				map.put("onecycle_feed", jObject.getString("onecycle_feed"));
+			           				map.put("status", jObject.getString("status"));
+			           			 	map.put("last_disp_feed_time", jObject.getString("last_disp_feed_time"));*/
+			           			           				  
+			           				mylist.add(map);
+			           			        }catch(Exception e){
+			           					  e.printStackTrace();	
+			           					}
+			           				} 
+		           			
+		           				if(mylist!=null){
+		           					updated();
+		           				}
+			 		    	 }catch(Exception e){
+			 		    		 e.printStackTrace();
+			 		    	 }
+						}
+	 		    	 }catch(Exception e){
+	 		    		 e.printStackTrace();
+	 		    	 }
+	 		    	 
+	 		    	 
+	 		     }
+
+
+	        }
+	        @Override
+	        protected Void doInBackground(String... params) {
+	            // TODO Auto-generated method stub
+	        	try{
+	        		 Context context=getApplicationContext();
+	     			ApplicationDetails = context.getSharedPreferences("com.pm",MODE_PRIVATE);
+	         	    
+	     		     String user_id = ApplicationDetails.getString("user_id", null);
+	        		 JSONObject loginJson = new JSONObject();
+					 loginJson.put("user_id", user_id);
+				 					 
+					 HttpParams httpParams = new BasicHttpParams();
+					 HttpConnectionParams.setConnectionTimeout(httpParams,TIMEOUT_MILLISEC);
+					 HttpConnectionParams.setSoTimeout(httpParams, TIMEOUT_MILLISEC);
+				     DefaultHttpClient httpclient = new MyHttpsClient(httpParams,getApplicationContext());
+					 HttpPost httppost = new HttpPost(Config.URL_FEEDER_DATA);
+					 httppost.setEntity(new ByteArrayEntity(loginJson.toString().getBytes("UTF8")));
+					 httppost.setHeader("eruv",loginJson.toString());
+					 HttpResponse response = httpclient.execute(httppost);
+					 HttpEntity entity = response.getEntity();		
+							 
+					 // If the response does not enclose an entity, there is no need
+					 if (entity != null){
+					 InputStream instream = entity.getContent();
+					 String result = convertStreamToString(instream);
+					 Log.i("Read from server", result);	
+						ApplicationData.addregentity(result);
+					 }else{
+			             String noresponse="nodata".toString().trim();
+			           	 ApplicationData.addregentity(noresponse);
+			         }
+					 
+	        	}catch(Exception e){
+	        		e.printStackTrace();
+	        	}
+	        	return null;
+
+	        }
+
+	    }
+	 private void updated() {
+		 try{
+			 final TableLayout t1=(TableLayout)findViewById(R.id.tblsetting1);
+			 t1.setVerticalScrollBarEnabled(true);
+		   	 t1.removeAllViewsInLayout(); 
+			 for(int i=0; i<mylist.size(); i++) {
+		   		 HashMap<String, String> map = mylist.get(i);
+		   		 final String feederSno=map.get("feederSno").toString().trim();
+		   		 final String feederId=map.get("feederId").toString().trim();
+		   		 final String feederName=map.get("feederName").toString().trim();
+		   		 final String schedule_date=map.get("schedule_date").toString().trim();
+		   		 final String last_update_time=map.get("last_update_time").toString().trim();
+		   		 final String total_dispensed_feed=map.get("total_dispensed_feed").toString().trim();
+      		   		 
+		   		 
+		   		final LinearLayout tablerow1=new LinearLayout(MainActivity.this);
+	              tablerow1.setOrientation(LinearLayout.HORIZONTAL);
+	              LinearLayout.LayoutParams paramas = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+	                      LinearLayout.LayoutParams.WRAP_CONTENT,1);
+	               paramas.setMargins(0,0,0,0);
+	               tablerow1.setLayoutParams(paramas);
+	               tablerow1.setPadding(5, 5, 0, 5);
+	               tablerow1.setBackgroundResource(R.drawable.shadow);
+	               
+	               final TextView PondName=new TextView(MainActivity.this);
+	               PondName.setText(feederName);
+	               PondName.setTextColor(Color.BLACK);
+	               PondName.setGravity(Gravity.LEFT);
+	               PondName.setFreezesText(true);
+	               PondName.setTextSize(18);
+	               PondName.setFocusable(false);
+	               LinearLayout.LayoutParams paramas2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+		                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+		              paramas2.setMargins(0, 0, 0, 0);
+		              PondName.setLayoutParams(paramas2);
+	               tablerow1.addView(PondName);
+	               
+	               
+	               final TextView pause=new TextView(MainActivity.this);
+	               pause.setTextColor(Color.BLACK);
+	               pause.setGravity(Gravity.CENTER);
+	               pause.setFreezesText(true);
+	               pause.setTextSize(13);
+	              
+	               pause.setFocusable(false);
+	               pause.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause,0,0,0);
+	               LinearLayout.LayoutParams paramas4 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+		                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+	               pause.setLayoutParams(paramas4);
+		            //tablerow1.addView(pause);
+	               
+		            final TextView stop=new TextView(MainActivity.this);
+		            stop.setTextColor(Color.BLACK);
+		            stop.setGravity(Gravity.CENTER);
+		          
+		            stop.setFreezesText(true);
+		            stop.setTextSize(15);
+		            stop.setFocusable(false);
+		            stop.setCompoundDrawablesWithIntrinsicBounds(R.drawable.stop,0,0,0);
+		            LinearLayout.LayoutParams paramas6 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+			        LinearLayout.LayoutParams.WRAP_CONTENT,1);
+		              // stop.setLayoutParams(paramas6);
+			           // tablerow1.addView(stop);
+	                      
+	               t1.addView(tablerow1);
+	               
+	               final LinearLayout tablerow2=new LinearLayout(MainActivity.this);
+		              tablerow1.setOrientation(LinearLayout.HORIZONTAL);
+		              LinearLayout.LayoutParams paramas3 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+		                      LinearLayout.LayoutParams.WRAP_CONTENT,1);
+		          
+		              tablerow2.setPadding(5, 5, 0, 5);
+		               tablerow2.setLayoutParams(paramas3);
+		               tablerow2.setBackgroundResource(R.drawable.shadow);
+		               
+		              /* final TextView TF=new TextView(MainActivity.this);
+		               TF.setText("T.F(Kg)");
+		               TF.setTextColor(Color.BLACK);
+		               TF.setGravity(Gravity.CENTER);
+		               TF.setFreezesText(true);
+		               TF.setTextSize(15);
+		               TF.setFocusable(false);
+		               tablerow2.addView(TF);
+		               
+		               final TextView OCF=new TextView(MainActivity.this);
+		               OCF.setText("O.C.F(gm)");
+		               OCF.setTextColor(Color.BLACK);
+		               OCF.setGravity(Gravity.CENTER);
+		               OCF.setFreezesText(true);
+		               OCF.setTextSize(15);
+		               OCF.setFocusable(false);
+		               LinearLayout.LayoutParams paramas4 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+			                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+			             
+			              OCF.setLayoutParams(paramas4);
+		               tablerow2.addView(OCF);
+		               
+		               final TextView DF1=new TextView(MainActivity.this);
+		               DF1.setText("D.F(Kg)");
+		               DF1.setTextColor(Color.BLACK);
+		               DF1.setGravity(Gravity.CENTER);
+		               DF1.setFreezesText(true);
+		               DF1.setTextSize(15);
+		               DF1.setFocusable(false);
+		               LinearLayout.LayoutParams paramas9 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+			                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+			             
+			              DF1.setLayoutParams(paramas9);
+		               tablerow2.addView(DF1);*/
+		          
+		               
+		               final TextView Time=new TextView(MainActivity.this);
+		               Time.setText("L.D.T(min)");
+		               Time.setTextColor(Color.BLACK);
+		               Time.setGravity(Gravity.CENTER);
+		               Time.setFreezesText(true);
+		               Time.setTextSize(15);
+		               Time.setFocusable(false);
+		               LinearLayout.LayoutParams paramas5 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+			                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+			              
+			              Time.setLayoutParams(paramas5);
+		                tablerow2.addView(Time);
+		               
+		               //t1.addView(tablerow2);
+		               final String schedules=map.get("schedules").toString().trim();
+				   		 
+				   		JSONArray jsonArray = new JSONArray(schedules);
+				   		 if(jsonArray.length()>0){
+				   			for (int j = 0; j < jsonArray.length(); j++) {
+					   			 
+			      				JSONObject jObject = jsonArray.getJSONObject(j);
+			      				String schedule_id=jObject.getString("schedule_id");
+			      				String schedule_times=jObject.getString("schedule_times");
+			      				String totalTime=jObject.getString("totalTime");
+			      				final String original_feed=jObject.getString("original_feed");
+			      				final String one_cycle_feed=jObject.getString("one_cycle_feed");
+			      				final String feed_gap=jObject.getString("feed_gap");
+			      				final String kg_feed_disp_time=jObject.getString("kg_feed_disp_time");
+			      				String mode=jObject.getString("mode");
+			      				final String status=jObject.getString("status");
+			      				String dispensed_feed=jObject.getString("dispensed_feed");
+			      				 
+			      				 final LinearLayout tablerow3=new LinearLayout(MainActivity.this);
+					              tablerow3.setOrientation(LinearLayout.HORIZONTAL);
+					              LinearLayout.LayoutParams paramas11 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+					                      LinearLayout.LayoutParams.WRAP_CONTENT,1);
+					           
+					               tablerow3.setPadding(5, 5, 0, 5);
+					               tablerow3.setLayoutParams(paramas11);
+					               tablerow3.setBackgroundResource(R.drawable.shadow);
+					               
+					               final TextView TFK=new TextView(MainActivity.this);
+					               TFK.setText(feederName);
+					               TFK.setTextColor(Color.BLACK);
+					               TFK.setGravity(Gravity.CENTER);
+					               TFK.setFreezesText(true);
+					               TFK.setTextSize(18);
+					               TFK.setFocusable(false);
+					               TFK.setVisibility(8);
+					               tablerow3.addView(TFK);
+					               
+					               final TextView OCF1=new TextView(MainActivity.this);
+					               OCF1.setText("T.F(Kg) : "+original_feed);
+					               OCF1.setTextColor(Color.BLACK);
+					               OCF1.setGravity(Gravity.CENTER);
+					               OCF1.setFreezesText(true);
+					               OCF1.setTextSize(15 );
+					               OCF1.setFocusable(false);
+					               LinearLayout.LayoutParams paramas41 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+						                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+						           OCF1.setLayoutParams(paramas41);
+					               tablerow3.addView(OCF1);
+					               
+					               final TextView DF11=new TextView(MainActivity.this);
+					               DF11.setText("T.D.F(Kg) : "+dispensed_feed);
+					               DF11.setTextColor(Color.BLACK);
+					               DF11.setGravity(Gravity.CENTER);
+					               DF11.setFreezesText(true);
+					               DF11.setTextSize(15);
+					               DF11.setFocusable(false);
+					               LinearLayout.LayoutParams paramas91 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+						                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+						           DF11.setLayoutParams(paramas91);
+					               tablerow3.addView(DF11);
+					               
+					               final TextView Time1=new TextView(MainActivity.this);
+					               Time1.setText(totalTime);
+					               Time1.setTextColor(Color.BLACK);
+					               Time1.setGravity(Gravity.CENTER);
+					               Time1.setFreezesText(true);
+					               Time1.setTextSize(13);
+					               Time1.setFocusable(false);
+					               LinearLayout.LayoutParams paramas51 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+						                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+						              
+						            Time1.setLayoutParams(paramas51);
+					              // tablerow3.addView(Time1);
+					               
+					               t1.addView(tablerow3);
+					               tablerow3.setOnClickListener(new OnClickListener() {
+										
+										@Override
+										public void onClick(View v) {
+											// TODO Auto-generated method stub
+											try{
+												final Dialog dialog = new Dialog(MainActivity.this);
+			    				      			dialog.setContentView(R.layout.dialog);
+			    				      			dialog.setTitle(feederName);
+			    				      			dialog.show();
+			    				      			final EditText totalfeed=(EditText)dialog.findViewById(R.id.totalfeed);
+			    				      			totalfeed.setText(original_feed);
+			    				      			totalfeed.setSelection(totalfeed.getText().length());
+			    				      			final EditText ocf=(EditText)dialog.findViewById(R.id.ocf);
+			    				      			ocf.setText(one_cycle_feed);
+			    				      			ocf.setSelection(ocf.getText().length());
+			    				      			final EditText feedgap=(EditText)dialog.findViewById(R.id.feedgap);
+			    				      			feedgap.setText(feed_gap);
+			    				      			feedgap.setSelection(feedgap.getText().length());
+			    				      			/*final EditText okdtime=(EditText)dialog.findViewById(R.id.okdtime);
+			    				      			okdtime.setText(kg_feed_disp_time);
+			    				      			okdtime.setSelection(okdtime.getText().length());*/
+			    				      			final ImageButton pause=(ImageButton)dialog.findViewById(R.id.pause);
+			    				      			final ImageButton stop=(ImageButton)dialog.findViewById(R.id.stop);
+			    				      			String to_be_run="to_be_run".toString().trim();
+			    				      			String running="running".toString().trim();
+			    				      			String changed="changed".toString().trim();
+			    				      			String paused="paused".toString().trim();
+			    				      			final TextView tvpause=(TextView)dialog.findViewById(R.id.tvpause);
+			    				      			final TextView tvstop=(TextView)dialog.findViewById(R.id.tvstop);
+			    				      			if(status.equals(to_be_run))	{	 			
+			    				      				pause.setBackgroundResource(R.drawable.start);
+			    				      				tvpause.setText("Start");
+			    				      				tvstop.setVisibility(8);
+			    				      				stop.setVisibility(8);
+			    				      			}else if(status.equals(running)){
+			    				      				pause.setBackgroundResource(R.drawable.pause);
+			    				      				stop.setBackgroundResource(R.drawable.stop);
+			    				      				tvpause.setText("Pause");
+			    				      				tvstop.setText("Stop");
+			    				      			}else if(status.equals(changed)){
+			    				      				pause.setBackgroundResource(R.drawable.pause);
+			    				      				stop.setBackgroundResource(R.drawable.stop);
+			    				      				tvpause.setText("Pause");
+			    				      				tvstop.setText("Stop");
+			    				      			}else if(status.equals(paused)){
+			    				      				pause.setBackgroundResource(R.drawable.start);
+			    				      				stop.setBackgroundResource(R.drawable.stop);
+			    				      				tvpause.setText("Start");
+			    				      				tvstop.setText("Stop");
+			    				      				
+			    				      			}else{
+			    				      				pause.setBackgroundResource(R.drawable.start);
+			    				      				tvpause.setText("Start");
+			    				      				tvstop.setVisibility(8);
+			    				      				stop.setVisibility(8);
+			    				      			}
+			    				      			
+			    				      			pause.setOnClickListener(new OnClickListener() {
+													
+													@Override
+													public void onClick(View v) {
+														// TODO Auto-generated method stub
+														  
+													}
+												});
+			    				      			Button dialogcancel = (Button)dialog.findViewById(R.id.cancel2);
+		    				        			dialogcancel.setOnClickListener(new OnClickListener() {
+												 @Override
+													public void onClick(View v) {
+														// TODO Auto-generated method stub
+														dialog.dismiss();
+													}
+												});
+											}catch(Exception e){
+												e.printStackTrace();
+											}
+										}
+									});
+					                
+					   		}
+				   		 }else{
+				   			 
+				   		 final LinearLayout tablerow3=new LinearLayout(MainActivity.this);
+			              tablerow3.setOrientation(LinearLayout.HORIZONTAL);
+			              LinearLayout.LayoutParams paramas11 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+			                      LinearLayout.LayoutParams.WRAP_CONTENT,1);
+			           
+			               tablerow3.setPadding(5, 5, 0, 5);
+			               tablerow3.setLayoutParams(paramas11);
+			               tablerow3.setBackgroundResource(R.drawable.shadow);
+			               
+			               
+			               final TextView TFK=new TextView(MainActivity.this);
+			               TFK.setText(feederName);
+			               TFK.setTextColor(Color.BLACK);
+			               TFK.setGravity(Gravity.CENTER);
+			               TFK.setFreezesText(true);
+			               TFK.setTextSize(13);
+			               TFK.setFocusable(false);
+			               TFK.setVisibility(8);
+			               tablerow3.addView(TFK);
+			               
+			               final TextView OCF1=new TextView(MainActivity.this);
+			               OCF1.setText("T.F(Kg) : "+" 0 ");
+			               OCF1.setTextColor(Color.BLACK);
+			               OCF1.setGravity(Gravity.CENTER);
+			               OCF1.setFreezesText(true);
+			               OCF1.setTextSize(15);
+			               OCF1.setFocusable(false);
+			               LinearLayout.LayoutParams paramas41 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+				                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+				             
+				              OCF1.setLayoutParams(paramas41);
+			               tablerow3.addView(OCF1);
+			               final TextView DF11=new TextView(MainActivity.this);
+			               DF11.setText("T.D.F(Kg) : "+" 0 ");
+			               DF11.setTextColor(Color.BLACK);
+			               DF11.setGravity(Gravity.CENTER);
+			               DF11.setFreezesText(true);
+			               DF11.setTextSize(15);
+			               DF11.setFocusable(false);
+			               LinearLayout.LayoutParams paramas91 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+				                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+				             
+				              DF11.setLayoutParams(paramas91);
+			               tablerow3.addView(DF11);
+			               final TextView Time1=new TextView(MainActivity.this);
+			               Time1.setText(" 0 ");
+			               Time1.setTextColor(Color.BLACK);
+			               Time1.setGravity(Gravity.CENTER);
+			               Time1.setFreezesText(true);
+			               Time1.setTextSize(13);
+			               Time1.setFocusable(false);
+			               LinearLayout.LayoutParams paramas51 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+				                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+				              
+				              Time1.setLayoutParams(paramas51);
+			               //tablerow3.addView(Time1);
+			               
+			               t1.addView(tablerow3);
+			               tablerow3.setOnClickListener(new OnClickListener() {
+								
+								@Override
+								public void onClick(View v) {
+									// TODO Auto-generated method stub
+									try{
+										final Dialog dialog = new Dialog(MainActivity.this);
+	    				      			dialog.setContentView(R.layout.dialog);
+	    				      			dialog.setTitle(feederName);
+	    				      			dialog.show();
+	    				      			final EditText totalfeed=(EditText)dialog.findViewById(R.id.totalfeed);
+	    				      			totalfeed.setText("0");
+	    				      			totalfeed.setSelection(totalfeed.getText().length());
+	    				      			final EditText ocf=(EditText)dialog.findViewById(R.id.ocf);
+	    				      			ocf.setText("0");
+	    				      			ocf.setSelection(ocf.getText().length());
+	    				      			final EditText feedgap=(EditText)dialog.findViewById(R.id.feedgap);
+	    				      			feedgap.setText("0");
+	    				      			feedgap.setSelection(feedgap.getText().length());
+	    				      			/*final EditText okdtime=(EditText)dialog.findViewById(R.id.okdtime);
+	    				      			okdtime.setText("0");
+	    				      			okdtime.setSelection(okdtime.getText().length());*/
+	    				      			Button dialogcancel = (Button)dialog.findViewById(R.id.cancel2);
+	    				      			final ImageButton pause=(ImageButton)dialog.findViewById(R.id.pause);
+	    				      			final ImageButton stop=(ImageButton)dialog.findViewById(R.id.stop);
+	    				      			final TextView tvpause=(TextView)dialog.findViewById(R.id.tvpause);
+	    				      			final TextView tvstop=(TextView)dialog.findViewById(R.id.tvstop);
+	    				      			pause.setBackgroundResource(R.drawable.start);
+	    				      			tvpause.setText("Start");
+	    				      			stop.setVisibility(8);
+	    				      			tvstop.setVisibility(8);
+    				        			dialogcancel.setOnClickListener(new OnClickListener() {
+										 @Override
+											public void onClick(View v) {
+												// TODO Auto-generated method stub
+												dialog.dismiss();
+											}
+										});
+									}catch(Exception e){
+										e.printStackTrace();
+									}
+								}
+							});
+			                
+			                
+				   		 }
+		 
+				   		    
+	               
+	               View v=new View(MainActivity.this);
+	                v.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+	                v.setBackgroundResource(R.drawable.seprator2);
+	                t1.addView(v);
+	               
+					      		/* LinearLayout.LayoutParams paramas2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+					                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+					              paramas2.setMargins(5, 0, 5, 0);
+					              PondName.setLayoutParams(paramas2);*/
+					      		 
+							  
+							     
+			 }
+		 }catch(Exception e){
+			 e.printStackTrace();
+		 }
+	 }
+	 public String convertStreamToString(InputStream instream) throws Exception {
+		// TODO Auto-generated method stub
+		BufferedReader reader = new BufferedReader(new InputStreamReader(instream));
+		StringBuilder sb = new StringBuilder();
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			
+		    sb.append(line);
+		}
+		 instream.close();
+		return sb.toString();
+
+		}
+}

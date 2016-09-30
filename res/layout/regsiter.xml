@@ -1,0 +1,168 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.eruvaka.pm">
+ 
+    <com.eruvaka.pm.MyViewPager
+        android:id="@+id/viewPagerVertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+ 
+        <LinearLayout
+            android:id="@+id/layout_sms"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:orientation="vertical">
+        
+                <EditText
+                    android:id="@+id/emailideditext"
+                    android:layout_width="300dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:hint="@string/em"
+                    android:textColor="@android:color/black"
+                   
+                    android:inputType="textEmailAddress"
+                    android:textSize="18sp" />
+ 
+                <EditText
+                    android:id="@+id/mobilenumberedittext"
+                    android:layout_width="300dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:hint="@string/phno"
+                    android:inputType="phone"
+                    android:maxLength="16"
+                    android:textColor="@android:color/black" 
+                  
+                    android:textCursorDrawable="@null"
+                    android:textSize="18sp"/>
+ 
+                <EditText
+                    android:id="@+id/firstnameedittext"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                     android:layout_marginTop="15dp"
+                    android:fontFamily="sans-serif-light"
+                    android:hint="@string/fname"
+                    android:singleLine="true"
+                    android:maxLength="26"
+                    android:textColor="@android:color/black" 
+                   
+                    android:textSize="18sp"/>
+                <EditText
+                    android:id="@+id/lastnameedittext"
+                    android:layout_width="300dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:hint="@string/lname"
+                    android:singleLine="true"
+                    android:maxLength="26"
+                    android:textColor="@android:color/black"
+                   
+                    android:textSize="18sp"/>
+                <EditText
+                    android:id="@+id/createedittext"
+                    android:layout_width="300dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:hint="@string/cpwd"
+                    android:textColor="@android:color/black"
+                    android:singleLine="true"
+                    android:textSize="18sp" />
+                <EditText
+                    android:id="@+id/reenteredittext"
+                    android:layout_width="300dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@android:color/black"
+                    android:hint="@string/rpwd"
+                    android:singleLine="true"
+                    android:textSize="18sp" />
+ 
+                <Button
+                    android:id="@+id/btn_request_sms1"
+                    android:layout_width="120dp"
+                    android:layout_height="39dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/rounded_green"
+                    android:text="@string/lbl_submit"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp" />
+            </LinearLayout>
+ 
+        </LinearLayout>
+ 
+        <LinearLayout
+            android:id="@+id/layout_otp"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+ 
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:gravity="center_horizontal"
+                android:paddingLeft="40dp"
+                android:paddingRight="40dp"
+                android:paddingTop="10dp"
+                android:text="@string/msg_sit_back"
+                 android:textColor="@android:color/black"
+                android:textSize="16sp" />
+ 
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="25dp"
+                android:gravity="center_horizontal"
+                android:paddingLeft="40dp"
+                android:paddingRight="40dp"
+                android:text="@string/msg_manual_otp"
+                android:textColor="@android:color/black"
+                android:textSize="12sp" />
+ 
+            <EditText
+                android:id="@+id/inputOtp"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:gravity="center_horizontal"
+                android:hint="@string/lbl_enter_otp"
+                android:inputType="number"
+                android:maxLength="6"
+                
+                android:padding="10dp"
+                android:textCursorDrawable="@null"
+                android:textSize="18sp" />
+ 
+            <Button
+                android:id="@+id/btn_verify_otp"
+                android:layout_width="120dp"
+                android:layout_height="39dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="25dp"
+                android:background="@drawable/rounded_green"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="@string/submit"
+                android:textColor="@android:color/white"/>
+ 
+        </LinearLayout>
+        </com.eruvaka.pm.MyViewPager>
+  
+</RelativeLayout>

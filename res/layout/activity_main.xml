@@ -1,0 +1,37 @@
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipe_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+ 
+       
+     <ScrollView 
+       android:layout_width="match_parent"
+       android:scrollbars="vertical"
+       android:layout_height="wrap_content">
+     
+ <LinearLayout 
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:orientation="vertical"
+     android:layout_marginTop="5dp">
+      
+        <TableLayout
+            android:id="@+id/tblsetting1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="vertical"
+            android:shrinkColumns="*"
+            android:stretchColumns="*"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="@android:color/white">
+        </TableLayout>
+        </LinearLayout>
+</ScrollView>
+   </android.support.v4.widget.SwipeRefreshLayout>
+
+  
+
+ 
