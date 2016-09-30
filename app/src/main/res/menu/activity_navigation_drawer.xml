@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/add_fest"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="Add a Fest" />
+        <item
+            android:id="@+id/startup_samachar"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Startup Samachar" />
+        <item
+            android:id="@+id/campus_samachar"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Campus Samachar" />
+        <item
+            android:id="@+id/fsp_program"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="FSP Program" />
+    </group>
+
+   <!-- <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Share" />
+            <item
+                android:id="@+id/send"
+                android:icon="@drawable/ic_menu_send"
+                android:title="Send" />
+        </menu>
+    </item>-->
+
+</menu>
