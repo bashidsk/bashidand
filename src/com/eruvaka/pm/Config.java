@@ -4,8 +4,8 @@ public class Config {
 	
 	    // server URL configuration
 	    //testserver
-	    public static final String URL="52.77.24.190/eruvaka_live".toString();
-	   // public static final String URL="eruvaka.com".toString();
+	   // public static final String URL="52.77.24.190/eruvaka_live".toString();
+	    public static final String URL="eruvaka.com".toString();
 	    public static final String URL_KEY_LOGIN  = "http://"+URL+"/mobile/pondmother_basicmodes/login";
 	    public static final String URL_FEEDER_DATA = "http://"+URL+"/mobile/pondmother_basicmodes/getfeeders";
 	    public static final String URL_GET_Single_Feeder = "http://"+URL+"/mobile/pondmother_basicmodes/get_singlefeeder";

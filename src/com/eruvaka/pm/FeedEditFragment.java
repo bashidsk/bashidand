@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import org.apache.http.HttpEntity;
@@ -54,6 +55,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -85,7 +87,7 @@ public class FeedEditFragment extends Fragment implements View.OnClickListener {
 	private int mEndDay = 0;
 	private int mEndMonth = 0;
 	private int mEndYear = 0;
-	ActionBar actionbar;
+	ActionBar actionbar; 
 	SharedPreferences ApplicationDetails;
   	SharedPreferences.Editor ApplicationDetailsEdit;
   	private static final int TIMEOUT_MILLISEC = 0;
@@ -3399,6 +3401,7 @@ public class FeedEditFragment extends Fragment implements View.OnClickListener {
 							    	Toast.makeText(getActivity(),R.string.daterange, Toast.LENGTH_SHORT).show();
 							        }
 							  
+								Dateset(); 
 							    	 
 						 }catch(Exception e){
 							 e.printStackTrace();
@@ -3481,7 +3484,7 @@ public class FeedEditFragment extends Fragment implements View.OnClickListener {
 									    	Toast.makeText(getActivity(),"allowed only 7 days", Toast.LENGTH_SHORT).show();
 									        }
 									   
-									    	 
+										Dateset();  
 								 }catch(Exception e){
 									 e.printStackTrace();
 								 }
@@ -3558,6 +3561,7 @@ public class FeedEditFragment extends Fragment implements View.OnClickListener {
 								}else{
 									try{
 					 		    		 mylist.clear();
+					 		    	
 					 		    		String data=jsn.getString("data");
 					 		    		JSONObject jObject2 = new JSONObject(data);
 				           				String timezone=jObject2.getString("timezone");
@@ -3590,12 +3594,18 @@ public class FeedEditFragment extends Fragment implements View.OnClickListener {
 				           				  	        	  liner.setVisibility(View.VISIBLE);
 				           				  	        	  liner_table.setVisibility(View.GONE);
 				           				  	            //Basic Mode
+				           				  	     	send_list.clear();
 				     	           						 basicMode(); 
 				           				  	          }else if(mode.equals(mode2)){
 				           				  	        	  liner.setVisibility(View.GONE);
 				           				  	        	  liner_table.setVisibility(View.VISIBLE);
 				           				  	        	  //SChedule Mode
-				           				  	       
+				           				  	         
+				           				  	        	mylist_schedule.clear();
+				           				  	        	check_array.clear();
+				           				  	        	update_list.clear();
+				           				  	        	add_mylist.clear();
+				           				  	        	get_mylist.clear();
 				           				  	        	  //DisplayShow();
 				           				  	        	  scheduleMode();
 				           				  	   	        tv.setVisibility(View.VISIBLE);
@@ -3696,5 +3706,42 @@ public class FeedEditFragment extends Fragment implements View.OnClickListener {
 				
 					 
 				 }
+	protected void Dateset(){
+		// TODO Auto-generated method stub
+			 try{
+			 final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy",Locale.getDefault());
+			 dateFormat.setTimeZone(TimeZone.getTimeZone(timezone));
+				String from_date=start_date.getText().toString().trim();
+				 Date f_date = dateFormat.parse(from_date);
+				 String to_date=end_date.getText().toString().trim();
+				 Date t_date = dateFormat.parse(to_date);
+				
+				 try{
+					 List<Date> dates = new ArrayList<Date>();
+					 long interval = 24*1000 * 60 * 60;
+					 long endTime =t_date.getTime() ; // create your endtime here, possibly using Calendar or Date
+					 long curTime = f_date.getTime();
+					 while (curTime <= endTime) {
+						    dates.add(new Date(curTime));
+						    curTime += interval;
+						}
+					 final SimpleDateFormat dateFormat2 = new SimpleDateFormat("dd MMM ",Locale.getDefault());
+					 dateFormat2.setTimeZone(TimeZone.getTimeZone(timezone));
+					// date_array.clear();
+					 for(int i=0;i<dates.size();i++){
+						    Date lDate =(Date)dates.get(i);
+						    String ds = dateFormat2.format(lDate);
+						    System.out.println(ds);
+						     // date_array.add(ds);
+						}
+									  
+				 }catch(Exception e){
+					 e.printStackTrace();
+				 }
+			 }catch(Exception e){
+				 e.printStackTrace();
+			 }
+	
+	}
 				 
 }

@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">Pond Mother</string>
-    <string name="versions">Version P.M.3.1</string>
+    <string name="versions">Version P.M.3.3</string>
     <string name="action_settings">Settings</string>
     <string name="noresponse">No Response From Server Please Try Again</string>
     <string name="emaidnumber">Email Id / Mobile Number</string>

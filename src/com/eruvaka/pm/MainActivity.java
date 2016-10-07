@@ -45,6 +45,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -417,7 +419,7 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 		                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
 		              paramas2.setMargins(0, 0, 0, 0);
 		              PondName.setLayoutParams(paramas2);
-	               tablerow1.addView(PondName);
+	               
 	               
 	              
 	               final LinearLayout tablerow_last_update_time_tv=new LinearLayout(MainActivity.this);
@@ -429,17 +431,34 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 		               tablerow_last_update_time_tv.setPadding(0,0,0,0);
 		              
 		               final TextView last_update_time_tv=new TextView(MainActivity.this);
-		               last_update_time_tv.setTextColor(Color.parseColor("#5186ab"));
+		               last_update_time_tv.setTextColor(Color.parseColor("#a5151d"));
 		               last_update_time_tv.setGravity(Gravity.LEFT);
 		               last_update_time_tv.setFreezesText(true);
-		               last_update_time_tv.setTextSize(16);
+		               last_update_time_tv.setTextSize(18);
 		               last_update_time_tv.setFocusable(false);
 		               LinearLayout.LayoutParams paramas92 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
 			                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
 		               last_update_time_tv.setLayoutParams(paramas92);
 		               last_update_time_tv.setPadding(0,0,0,5);
 		               tablerow_last_update_time_tv.addView(last_update_time_tv);
-		               
+		               Animation anim = new AlphaAnimation(0.0f, 1.0f);
+			              anim.setDuration(50); //You can manage the time of the blink with this parameter
+			              anim.setStartOffset(20);
+			              anim.setRepeatMode(Animation.REVERSE);
+			              anim.setRepeatCount(Animation.INFINITE);
+			              
+			              final TextView status_tv_head=new TextView(MainActivity.this);
+			              
+			               status_tv_head.setTextColor(Color.parseColor("#5186ab"));
+			               status_tv_head.setGravity(Gravity.RIGHT);
+			               status_tv_head.setFreezesText(true);
+			               status_tv_head.setTextSize(18);
+			               status_tv_head.setFocusable(false);
+			               status_tv_head.setPadding(0,0,0,10);
+			               LinearLayout.LayoutParams paramas4 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+				                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+				              paramas4.setMargins(0, 0, 0,0);
+				              status_tv_head.setLayoutParams(paramas4);
 	               final TextView schedules_date=new TextView(MainActivity.this);
 	               try{
 	              
@@ -460,9 +479,13 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 						 if(current_date.equals(startdate)){
 							  schedules_date.setText("Today"); 
 							  last_update_time_tv.setText("Last Updated At : "+" Today "+last_update_time);
+							 // last_update_time_tv.startAnimation(anim);
+							  status_tv_head.setText("Today");
 						 }else{
 							  schedules_date.setText(startdate);
 							  last_update_time_tv.setText("Last Updated At : "+startdate+" "+last_update_time);
+							  //last_update_time_tv.startAnimation(anim);
+							  status_tv_head.setText("Status");
 						 }
 						
 	    	    	 
@@ -486,7 +509,7 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 	               final TextView tdf=new TextView(MainActivity.this);
 	               tdf.setText(" "+total_dispensed_feed +" / "+total_actual_feed+"  Kg");
 	               tdf.setTextColor(Color.BLACK);
-	               tdf.setGravity(Gravity.LEFT);
+	               tdf.setGravity(Gravity.CENTER);
 	               tdf.setFreezesText(true);
 	               tdf.setTextSize(16);
 	               tdf.setFocusable(false);
@@ -497,7 +520,10 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 		              tdf.setLayoutParams(paramas3);
 		              tdf.setPadding(0,0,0,10);
 		              
-		              final TextView Pause1=new TextView(MainActivity.this);
+		             
+		              
+		              
+		            /*  final TextView Pause1=new TextView(MainActivity.this);
 		              Pause1.setTextColor(Color.BLACK);
 		              Pause1.setGravity(Gravity.LEFT);
 		              Pause1.setFreezesText(true);
@@ -516,15 +542,17 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 		               Stop1.setFocusable(false);
 		               Stop1.setPadding(0,0,10,0);
 		               Stop1.setHeight(0);
-		               Stop1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.s1,0,0,0);
+		               Stop1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.s1,0,0,0);*/
 		              
 		              
 		              
+		           tablerow1.addView(PondName);   
 	               tablerow1.addView(tdf);
+	               tablerow1.addView(status_tv_head);
 	               //tablerow1.addView(schedules_date);
-	               tablerow1.addView(Pause1);
-	               tablerow1.addView(Stop1);
-	               
+	              // tablerow1.addView(Pause1);
+	               //tablerow1.addView(Stop1);
+	              
 	               t1.addView(tablerow1);
 	               
 	            
@@ -638,7 +666,7 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 					               
 					               final TextView DF11=new TextView(MainActivity.this);
 					               DF11.setTextColor(Color.BLACK);
-					               DF11.setGravity(Gravity.LEFT);
+					               DF11.setGravity(Gravity.CENTER);
 					               DF11.setFreezesText(true);
 					               DF11.setTextSize(16);
 					               DF11.setFocusable(false);
@@ -701,9 +729,26 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 					               Stop.setPadding(0,0,10,0);
 					               Stop.setCompoundDrawablesWithIntrinsicBounds(R.drawable.stop1,0,0,0);
 					              
+					               
+					                
+					                final TextView status_tv_data=new TextView(MainActivity.this);
+					               
+					                status_tv_data.setGravity(Gravity.RIGHT);
+					                status_tv_data.setFreezesText(true);
+					                status_tv_data.setTextSize(16);
+					                status_tv_data.setFocusable(false);
+					                status_tv_data.setPadding(0,0,0,10);
+					                LinearLayout.LayoutParams paramas5 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+						                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+						              paramas5.setMargins(0, 0, 0,0);
+						              status_tv_data.setLayoutParams(paramas5);
+						             
+						             
+					                
+					                tablerow3.addView(status_tv_data);
+					            			                
 					                t1.addView(tablerow3);
 					                
-					              
 					                String to_be_run="to_be_run".toString().trim();
     				      			String running="running".toString().trim();
     				      			String changed="changed".toString().trim();
@@ -712,26 +757,39 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
     				      			if(status.equals(to_be_run)){
     				      				//start.setBackgroundResource(R.drawable.start);	 
     				      				//tvstatus.setText("running");
-    				      			   tablerow3.addView(Start1);
+    				      				status_tv_data.setText("To Be Run");
+    				      				
+    				      			  /* tablerow3.addView(Start1);
     				      			   tablerow3.addView(Start);
-    				      			  Start.setHeight(0);
+    				      			  Start.setHeight(0);*/
+    				      				
     				      			}else if(status.equals(running)){
-    				      				 tablerow3.addView(Pause);
-    				      				 tablerow3.addView(Stop);
+    				      				 /*tablerow3.addView(Pause);
+    				      				 tablerow3.addView(Stop);*/
+    				      				 status_tv_data.setTextColor(Color.parseColor("#24890d"));
+    				      				status_tv_data.setText("On Run");
+    				      				status_tv_data.startAnimation(anim);
+    				      				status_tv_data.setTextSize(18);
     				      				//tvstatus.setText("running");
     				      			}else if(status.equals(changed)){
-    				      				 tablerow3.addView(Pause);
-    				      				 tablerow3.addView(Stop);
+    				      				 /*tablerow3.addView(Pause);
+    				      				 tablerow3.addView(Stop);*/
+    				      				status_tv_data.setText("Changed");
+    				      				 status_tv_data.setTextColor(Color.BLACK);
     				      				//tvstatus.setText("changed");
     				      			}else if(status.equals(paused)){
-    				      			  tablerow3.addView(Start);
+    				      				status_tv_data.setText("Paused");
+    				      				 status_tv_data.setTextColor(Color.BLACK);
+    				      			 /* tablerow3.addView(Start);
     				      			  Start.setHeight(0);
-    				      			  tablerow3.addView(Stop);
+    				      			  tablerow3.addView(Stop);*/
     				      		 	 //tvstatus.setText("paused");
     				      			}else{
-    				      			  tablerow3.addView(Start1);
+    				      				status_tv_data.setText("Completed");
+    				      				 status_tv_data.setTextColor(Color.BLACK);
+    				      			  /*tablerow3.addView(Start1);
     				      			  tablerow3.addView(Start);
-    				      			  Start.setHeight(0);
+    				      			  Start.setHeight(0);*/
     				      				//tvstatus.setText("completed");
     				      			}
     				      			
@@ -769,7 +827,7 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 			               final TextView DF11=new TextView(MainActivity.this);
 			               DF11.setText(" 0"+" / "+"0"+"  Kg");
 			               DF11.setTextColor(Color.BLACK);
-			               DF11.setGravity(Gravity.LEFT);
+			               DF11.setGravity(Gravity.CENTER);
 			               DF11.setFreezesText(true);
 			               DF11.setTextSize(16);
 			               DF11.setPadding(0,0,0,5);
@@ -781,6 +839,22 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 			               tablerow3.addView(DF11);
 			               //tablerow3.addView(EDIT);
 			               t1.addView(tablerow3);
+			               
+			               
+			               
+			               final TextView status_tv_data=new TextView(MainActivity.this);
+			                status_tv_data.setTextColor(Color.BLACK);
+			                status_tv_data.setGravity(Gravity.RIGHT);
+			                status_tv_data.setFreezesText(true);
+			                status_tv_data.setTextSize(16);
+			                status_tv_data.setFocusable(false);
+			                status_tv_data.setPadding(0,0,0,10);
+			                status_tv_data.setText("Add Schedule");
+			                LinearLayout.LayoutParams paramas5 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+				                     LinearLayout.LayoutParams.WRAP_CONTENT,1);
+				              paramas5.setMargins(0, 0, 0,0);
+				              status_tv_data.setLayoutParams(paramas5);
+			                tablerow3.addView(status_tv_data);
 			               
 			               final TextView Start=new TextView(MainActivity.this);
 			               Start.setTextColor(Color.BLACK);
@@ -803,8 +877,8 @@ public class MainActivity extends ActionBarActivity implements OnRefreshListener
 			               Start1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.s1,0,0,0);
 			               Start1.setHeight(0);
 			               
-			               tablerow3.addView(Start1);
-			               tablerow3.addView(Start);
+			              // tablerow3.addView(Start1);
+			               //tablerow3.addView(Start);
 			               
 			               tablerow3.setOnClickListener(new OnClickListener() {
 								
